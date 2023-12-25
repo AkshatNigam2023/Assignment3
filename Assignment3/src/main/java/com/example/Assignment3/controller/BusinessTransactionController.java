@@ -10,8 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/vendors")
-public class VendorController {
+@RequestMapping("/vendorsApi")
+public class BusinessTransactionController {
 
     @Autowired
     private VendorRepository vendorRepository;
@@ -22,7 +22,7 @@ public class VendorController {
     @PostMapping("/register")
     public ResponseEntity<String> registerVendor(@RequestBody Vendor vendor) {
         if (vendorRepository.existsById(vendor.getVendorId())) {
-            return ResponseEntity.badRequest().body("Vendor with the same name already exists.");
+            return ResponseEntity.badRequest().body("Vendor already exists.");
         }
         vendor.setStatus(false);
         vendorRepository.save(vendor);
@@ -54,7 +54,7 @@ public class VendorController {
         return ResponseEntity.ok("Vendor approved successfully.");
     }
 
-    @PostMapping("/transfer-to-personal/{vendorId}")
+    @PostMapping("/transferToPersonal/{vendorId}")
     public ResponseEntity<String> transferMoney(
             @PathVariable int vendorId,
             @RequestParam("amount") Double amount,

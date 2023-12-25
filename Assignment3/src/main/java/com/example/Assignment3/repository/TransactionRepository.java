@@ -1,7 +1,7 @@
 package com.example.Assignment3.repository;
 
 import com.example.Assignment3.model.Transaction;
-import com.example.Assignment3.model.TransactionStatus;
+import com.example.Assignment3.util.TransactionStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

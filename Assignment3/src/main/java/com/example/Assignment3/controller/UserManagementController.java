@@ -2,7 +2,7 @@ package com.example.Assignment3.controller;
 
 import com.example.Assignment3.exception.UserAlreadyEnrolledException;
 import com.example.Assignment3.exception.UserNotFoundException;
-import com.example.Assignment3.service.AuthenticationService;
+import com.example.Assignment3.serviceImpl.UserAuthenticationService;
 import com.example.Assignment3.serviceImpl.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,27 +11,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/usersApi")
 @RequiredArgsConstructor
-public class UserController {
+public class UserManagementController {
     @Autowired
     UserServiceImpl userService;
 
     @Autowired
-    AuthenticationService service;
-
-//    @PostMapping("/register")
-//    public ResponseEntity<User> registerUser(@RequestParam int user_id, @RequestParam String user_name, @RequestParam String address, @RequestParam Double latitude, @RequestParam Double longitude) {
-//        try {
-//            User user = userService.registerUser(user_id, user_name, address, latitude, longitude);
-//            return ResponseEntity.ok(user);
-//        } catch (UnsupportedEncodingException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
+    UserAuthenticationService service;
 
     @PostMapping("/enroll")
-    public ResponseEntity<String> enrollForOfflinePayment(@RequestParam int user_id) {
+    public ResponseEntity<String> enrollForOfflinePayment(@RequestParam(name = "user_id") int user_id) {
         try {
             userService.enrollForOfflinePayment(user_id);
             return ResponseEntity.ok("Enrolled for offline payment successfully.");
@@ -43,12 +33,12 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request){
+    public ResponseEntity<JwtTokenResponseController> register(@RequestBody RegistrationRequestController request){
         return ResponseEntity.ok(service.register(request));
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request){
+    public ResponseEntity<JwtTokenResponseController> authenticate(@RequestBody LoginCredentialsController request){
         return ResponseEntity.ok(service.authenticate(request));
     }
 }

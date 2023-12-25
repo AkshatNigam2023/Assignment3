@@ -1,4 +1,4 @@
-package com.example.Assignment3.config;
+package com.example.Assignment3.util;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

@@ -1,5 +1,7 @@
 package com.example.Assignment3.model;
 
+import com.example.Assignment3.util.PaymentMode;
+import com.example.Assignment3.util.TransactionStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,7 +15,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "transaction_table")
+@Table(name = "transactionTable")
 public class Transaction {
 
     @Id

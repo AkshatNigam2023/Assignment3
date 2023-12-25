@@ -1,12 +1,12 @@
-package com.example.Assignment3.service;
+package com.example.Assignment3.serviceImpl;
 
-import com.example.Assignment3.model.Role;
+import com.example.Assignment3.controller.JwtTokenResponseController;
+import com.example.Assignment3.controller.LoginCredentialsController;
+import com.example.Assignment3.controller.RegistrationRequestController;
 import com.example.Assignment3.model.User;
-import com.example.Assignment3.config.KeyGenerationUtils;
-import com.example.Assignment3.controller.AuthenticationRequest;
-import com.example.Assignment3.controller.AuthenticationResponse;
-import com.example.Assignment3.controller.RegisterRequest;
 import com.example.Assignment3.repository.UserRepository;
+import com.example.Assignment3.util.KeyGenerationUtils;
+import com.example.Assignment3.util.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,7 +18,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class AuthenticationService {
+public class UserAuthenticationService {
 
     @Autowired
     UserRepository repository;
@@ -32,7 +32,7 @@ public class AuthenticationService {
     @Autowired
     AuthenticationManager authenticationManager;
 
-    public AuthenticationResponse register(RegisterRequest request) {
+    public JwtTokenResponseController register(RegistrationRequestController request) {
         User user = new User();
         user.setUser_id(request.getUser_id());
         user.setName(request.getUser_name());
@@ -46,16 +46,16 @@ public class AuthenticationService {
         user.setRole(Role.USER);
         repository.save(user);
         var jwtToken = jwtService.generateToken(user);
-        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
+        JwtTokenResponseController authenticationResponse = new JwtTokenResponseController();
         authenticationResponse.setToken(jwtToken);
         return authenticationResponse;
     }
 
-    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+    public JwtTokenResponseController authenticate(LoginCredentialsController request) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUser_name(), request.getPassword()));
         User user = repository.findByName(request.getUser_name()).orElseThrow();
         var jwtToken = jwtService.generateToken(user);
-        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
+        JwtTokenResponseController authenticationResponse = new JwtTokenResponseController();
         authenticationResponse.setToken(jwtToken);
         return authenticationResponse;
     }

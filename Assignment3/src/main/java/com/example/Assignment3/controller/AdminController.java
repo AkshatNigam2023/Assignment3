@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/admin")
+@RequestMapping("/adminApi")
 public class AdminController {
 
     @Autowired
@@ -24,11 +24,11 @@ public class AdminController {
     public ResponseEntity<String> approveUser(@PathVariable int user_id) {
         try {
             User approvedUser = userService.approveUser(user_id);
-            return ResponseEntity.ok("User with ID " + approvedUser.getUser_id() + " has been approved.");
+            return ResponseEntity.ok("User ID " + approvedUser.getUser_id() + " is approved.");
         } catch (UserNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not found");
         } catch (UserAlreadyApprovedException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User is already approved");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Approved Already");
         }
     }
 }

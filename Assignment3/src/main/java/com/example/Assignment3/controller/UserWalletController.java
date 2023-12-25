@@ -11,23 +11,20 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashSet;
 import java.util.Set;
-
 @RestController
-@RequestMapping("/api/wallets")
-public class WalletController {
-
+@RequestMapping("/walletsApi")
+public class UserWalletController {
     @Autowired
     private WalletRepository walletRepository;
-
     @Autowired
     private UserRepository userRepository;
 
-    @PostMapping("/add-money/{userId}")
+    @PostMapping("/addMoney/{userId}")
     public ResponseEntity<String> addMoneyToWallet(
             @PathVariable("userId") int userId,
             @RequestParam("amount") Double amount) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("Not found"));
 
         Wallet wallet = user.getWallet();
         if (wallet == null) {
@@ -41,10 +38,10 @@ public class WalletController {
         return ResponseEntity.ok("Money added to wallet successfully.");
     }
 
-    @GetMapping("/check-balance/{userId}")
+    @GetMapping("/checkBalance/{userId}")
     public ResponseEntity<Double> checkWalletBalance(@PathVariable("userId") int userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("Not found"));
 
         Wallet wallet = user.getWallet();
         if (wallet == null) {
@@ -54,12 +51,12 @@ public class WalletController {
         return ResponseEntity.ok(wallet.getBalance());
     }
 
-    @PostMapping("/transfer-to-offline/{userId}")
+    @PostMapping("/transferToOffline/{userId}")
     public ResponseEntity<String> transferMoney(
             @PathVariable("userId") int userId,
             @RequestParam("amount") Double amount) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("Not found"));
 
         Wallet wallet = user.getWallet();
         if (wallet == null) {
@@ -96,16 +93,15 @@ public class WalletController {
         return RandomStringUtils.randomAlphanumeric(codeLength);
     }
 
-    @GetMapping("/get-codes/{userId}")
+    @GetMapping("/getCodes/{userId}")
     public ResponseEntity<Set<String>> getWalletCodes(@PathVariable("userId") int userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("Not found"));
 
         Wallet wallet = user.getWallet();
         if (wallet == null || wallet.getCodes().isEmpty()) {
             return ResponseEntity.ok(new HashSet<>()); // Return an empty set if no codes are available
         }
-
         return ResponseEntity.ok(wallet.getCodes());
     }
 }

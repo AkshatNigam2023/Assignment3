@@ -2,6 +2,8 @@ package com.example.Assignment3.controller;
 
 import com.example.Assignment3.model.*;
 import com.example.Assignment3.repository.*;
+import com.example.Assignment3.util.PaymentMode;
+import com.example.Assignment3.util.TransactionStatus;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -11,8 +13,8 @@ import java.util.Date;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/transactions")
-public class TransactionController {
+@RequestMapping("/transactionsApi")
+public class PaymentProcessingController {
 
     @Autowired
     private TransactionRepository transactionRepository;
@@ -29,14 +31,14 @@ public class TransactionController {
     @Autowired
     private AdminRepository adminRepository;
 
-    @PostMapping("/make-payment-online")
+    @PostMapping("/makeOnlinePayment")
     public ResponseEntity<String> makePayment(@RequestBody PaymentRequestOnline paymentRequest) {
         // Implement payment logic
         User user = userRepository.findById(paymentRequest.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("Not found"));
 
         Vendor vendor = vendorRepository.findById(paymentRequest.getVendorId())
-                .orElseThrow(() -> new RuntimeException("Vendor not found"));
+                .orElseThrow(() -> new RuntimeException("Not found"));
 
         // Check if the payment is within 20km radius
         if (!isWithinRadius(paymentRequest.getLatitude(), paymentRequest.getLongitude(), vendor.getLatitude(), vendor.getLongitude(), 20)) {
@@ -53,16 +55,12 @@ public class TransactionController {
             Wallet userWallet = user.getWallet();
             userWallet.setBalance(userWallet.getBalance() - paymentRequest.getAmount());
             walletRepository.save(userWallet);
-//
-//            // Update vendor's wallet balance
-//            Wallet vendorWallet = vendor.getStoreWallet();
-//            vendorWallet.setBalance(vendorWallet.getBalance() + paymentRequest.getAmount());
-//            walletRepository.save(vendorWallet);
+
 
             // Save the transaction
             transactionRepository.save(transaction);
 
-            return ResponseEntity.ok("Payment flagged. Payment made from > 20 km");
+            return ResponseEntity.ok("Payment flagged.");  //Payment from > 20 km
         } else {
             Transaction transaction = new Transaction();
             transaction.setUserId(paymentRequest.getUserId());
@@ -92,15 +90,16 @@ public class TransactionController {
 
 
 
-    @PostMapping("/make-payment-offline")
+    @PostMapping("/makeOfflinePayment")
     public ResponseEntity<String> makePaymentOffline(@RequestBody PaymentRequestOffline paymentRequestOffline) {
+
         // Implement offline payment logic
         User user = userRepository.findById(paymentRequestOffline.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("Not found"));
 
         // Check if the provided code matches any of the codes in the user's set
         if (!user.getWallet().getCodes().contains(paymentRequestOffline.getCode())) {
-            return ResponseEntity.badRequest().body("Invalid code. Transaction failed.");
+            return ResponseEntity.badRequest().body("Transaction Failed."); //Invalid Code
         }
 
         Vendor vendor = vendorRepository.findById(paymentRequestOffline.getVendorId())
@@ -121,15 +120,11 @@ public class TransactionController {
             userWallet.setOfflineBalance(userWallet.getOfflineBalance() - paymentRequestOffline.getAmount());
             walletRepository.save(userWallet);
 
-            // Update vendor's wallet balance
-//            Wallet vendorWallet = vendor.getPersonalWallet();
-//            vendorWallet.setBalance(vendorWallet.getBalance() + paymentRequestOffline.getAmount());
-//            walletRepository.save(vendorWallet);
 
             // Save the transaction
             transactionRepository.save(transaction);
 
-            return ResponseEntity.ok("payment flagged. distance > 20km");
+            return ResponseEntity.ok("payment flagged."); //Payment From > 20km
 
         } else {
 
@@ -154,18 +149,18 @@ public class TransactionController {
             // Save the transaction
             transactionRepository.save(transaction);
 
-            return ResponseEntity.ok("Offline payment successful.");
+            return ResponseEntity.ok("Offline Payment successful.");
         }
     }
 
-    @GetMapping("/flagged-transactions")
+    @GetMapping("/flaggedTransactions")
     public ResponseEntity<List<Transaction>> getFlaggedTransactions() {
         // Retrieve flagged transactions for admin review
         List<Transaction> flaggedTransactions = transactionRepository.findByStatus(TransactionStatus.FLAGGED).get();
         return ResponseEntity.ok(flaggedTransactions);
     }
 
-    @PostMapping("/review-transaction/{adminId}/{transactionId}/{approval}")
+    @PostMapping("/reviewTransaction/{adminId}/{transactionId}/{approval}")
     public ResponseEntity<String> reviewTransaction(
             @PathVariable Long adminId,
             @PathVariable Long transactionId,
@@ -189,12 +184,15 @@ public class TransactionController {
 
         return ResponseEntity.ok("Transaction reviewed successfully.");
     }
-
-
-    // Helper method to check if a location is within a certain radius
     private boolean isWithinRadius(double lat1, double lon1, double lat2, double lon2, double radius) {
         double earthRadius = 6371; // in kilometers
 
+        double distance = haversineDistance(lat1, lon1, lat2, lon2, earthRadius);
+
+        return distance <= radius;
+    }
+
+    private double haversineDistance(double lat1, double lon1, double lat2, double lon2, double earthRadius) {
         double latDistance = Math.toRadians(lat2 - lat1);
         double lonDistance = Math.toRadians(lon2 - lon1);
 
@@ -204,9 +202,7 @@ public class TransactionController {
 
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-        double distance = earthRadius * c;
-
-        return distance <= radius;
+        return earthRadius * c;
     }
 
     // Helper method to transfer amount to the vendor's wallet
@@ -229,7 +225,7 @@ public class TransactionController {
     // Helper method to return amount to the user's wallet
     private void returnAmountToUser(Transaction transaction) {
         User user = userRepository.findById(transaction.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("Not found"));
 
         // Return amount to user's wallet
         Wallet userWallet = user.getWallet();
@@ -256,40 +252,20 @@ public class TransactionController {
             return latitude;
         }
 
-        public void setLatitude(Double latitude) {
-            this.latitude = latitude;
-        }
-
         public Double getLongitude() {
             return longitude;
-        }
-
-        public void setLongitude(Double longitude) {
-            this.longitude = longitude;
         }
 
         public Integer getUserId() {
             return userId;
         }
 
-        public void setUserId(Integer userId) {
-            this.userId = userId;
-        }
-
         public Integer getVendorId() {
             return vendorId;
         }
 
-        public void setVendorId(Integer vendorId) {
-            this.vendorId = vendorId;
-        }
-
         public Double getAmount() {
             return amount;
-        }
-
-        public void setAmount(Double amount) {
-            this.amount = amount;
         }
 
     }
@@ -309,50 +285,25 @@ public class TransactionController {
             return code;
         }
 
-        public void setCode(String code) {
-            this.code = code;
-        }
-
         public Double getLatitude() {
             return latitude;
-        }
-
-        public void setLatitude(Double latitude) {
-            this.latitude = latitude;
         }
 
         public Double getLongitude() {
             return longitude;
         }
 
-        public void setLongitude(Double longitude) {
-            this.longitude = longitude;
-        }
-
         public Integer getUserId() {
             return userId;
-        }
-
-        public void setUserId(Integer userId) {
-            this.userId = userId;
         }
 
         public Integer getVendorId() {
             return vendorId;
         }
 
-        public void setVendorId(Integer vendorId) {
-            this.vendorId = vendorId;
-        }
-
         public Double getAmount() {
             return amount;
         }
-
-        public void setAmount(Double amount) {
-            this.amount = amount;
-        }
-
     }
 }
 

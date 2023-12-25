@@ -1,5 +1,6 @@
 package com.example.Assignment3.model;
 
+import com.example.Assignment3.util.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,10 +26,6 @@ public class User implements UserDetails {
     String name;
 
     String password;
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 
     String user_secret;
 
@@ -192,5 +189,8 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

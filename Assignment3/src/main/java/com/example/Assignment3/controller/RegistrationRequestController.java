@@ -9,10 +9,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RegisterRequest {
+public class RegistrationRequestController {
     int user_id;
     String user_name;
     String password;
+    Double latitude;
+    Double longitude;
 
     public String getPassword() {
         return password;
@@ -21,12 +23,6 @@ public class RegisterRequest {
     public void setPassword(String password) {
         this.password = password;
     }
-
-
-    Double latitude;
-    Double longitude;
-
-
 
     public int getUser_id() {
         return user_id;

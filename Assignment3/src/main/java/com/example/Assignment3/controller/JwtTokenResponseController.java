@@ -10,15 +10,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthenticationResponse {
+public class JwtTokenResponseController {
 
     private String token;
 
-    public AuthenticationResponse() {
-    }
-
-    public String getToken() {
-        return token;
+    public JwtTokenResponseController() {
     }
 
     public void setToken(String token) {
